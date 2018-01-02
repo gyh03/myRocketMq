@@ -1,26 +1,9 @@
-/**
- * Copyright (C) 2010-2013 Alibaba Group Holding Limited
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.gyh.simple;
 
-import com.alibaba.rocketmq.client.QueryResult;
 import com.alibaba.rocketmq.client.exception.MQClientException;
 import com.alibaba.rocketmq.client.producer.DefaultMQProducer;
 import com.alibaba.rocketmq.client.producer.SendResult;
 import com.alibaba.rocketmq.common.message.Message;
-import com.alibaba.rocketmq.common.message.MessageExt;
 
 
 public class ProducerTest {
@@ -40,6 +23,10 @@ public class ProducerTest {
         /**
          * Producer对象在使用之前必须要调用start初始化，初始化一次即可<br>
          * 注意：切记不可以在每次发送消息时，都调用start方法
+         * 初始化主要完成的任务有：
+         如果没有指定namesrv地址，将会自动寻址
+         启动定时任务：更新namesrv地址、从namsrv更新topic路由信息、清理已经挂掉的broker、向所有broker发送心跳...
+         启动负载均衡的服务
          */
         producer.start();
 
@@ -49,21 +36,22 @@ public class ProducerTest {
          * 例如消息写入Master成功，但是Slave不成功，这种情况消息属于成功，但是对于个别应用如果对消息可靠性要求极高，<br>
          * 需要对这种情况做处理。另外，消息可能会存在发送失败的情况，失败重试由应用来处理。
          */
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 4; i++)
             try {
                 {
                     Message msg = new Message("TopicTest1",// topic
-                        "TagA",// tag
-                        "key113",// key
-                        ("Hello MetaQ" + i).getBytes());// body
+                        "TagA",//tag：给消息打标签,用于区分一类消息，可为null
+                        "key" + i,// key：自定义Key，可以用于去重，可为null
+                        ("Hello MetaQ" + i).getBytes());//body：消息内容
+                    // 发送消息并返回结果
                     SendResult sendResult = producer.send(msg);
                     System.out.println(sendResult);
 
-                    QueryResult queryMessage =
+                    /*QueryResult queryMessage =
                             producer.queryMessage("TopicTest1", "key113", 10, 0, System.currentTimeMillis());
                     for (MessageExt m : queryMessage.getMessageList()) {
                         System.out.println(m);
-                    }
+                    }*/
                 }
 
             }
