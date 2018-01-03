@@ -78,3 +78,6 @@ ConsumeMessageThread_1 > MessageExt [queueId=2, storeSize=147, queueOffset=14, s
 
 如果不同的订单，发送到同一个queue中，也会这两个订单也会按顺序消费，即10条消息按顺序被同一线程消费。
 而且如果第一个订单有一条消息阻塞了(消费失败，不断重试)，第二条订单的消息也不会被消费，所以建议不同的消息使用不同的queueId。
+<br><br>
+
+参考：https://www.cnblogs.com/520playboy/p/6750023.html
